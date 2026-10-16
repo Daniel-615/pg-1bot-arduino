@@ -1,0 +1,42 @@
+{
+  "name": "pg-1bot-backend",
+  "version": "1.0.0",
+  "description": "Backend local para compilacion y carga de Arduino",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "bin": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "node index.js",
+    "build:win": "pkg . --targets node18-win-x64 --out-path dist",
+    "build:agent:win": "pkg . --targets node18-win-x64 --output dist/1bot-arduino-agent.exe",
+    "build:mac": "pkg . --targets node18-macos-x64,node18-macos-arm64 --out-path dist",
+    "build:linux": "pkg . --targets node18-linux-x64,node18-linux-arm64 --out-path dist",
+    "build:all": "pkg . --targets node18-win-x64,node18-linux-x64,node18-linux-arm64,node18-macos-x64,node18-macos-arm64 --out-path dist",
+    "test": "echo \"No tests configured\""
+  },
+  "dependencies": {
+    "arduino-cli": "^0.37.0",
+    "axios": "^1.16.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.10.1",
+    "multer": "^2.1.1",
+    "serialport": "^13.0.0",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "pkg": "^5.8.1"
+  },
+  "pkg": {
+    "scripts": [
+      "index.js"
+    ]
+  }
+}

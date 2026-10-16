@@ -1,0 +1,5 @@
+node_modules
+npm-debug.log
+.env
+dist
+arduino-data/tools/arduino-cli/*
