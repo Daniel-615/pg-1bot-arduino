@@ -11,7 +11,9 @@
     "dev": "nodemon index.js",
     "start": "node index.js",
     "build:win": "pkg . --targets node18-win-x64 --out-path dist",
-    "build:agent:win": "pkg . --targets node18-win-x64 --output dist/1bot-arduino-agent.exe",
+    "build:agent:win": "pkg . --targets node18-win-x64 --output dist/1bot-arduino-agent.exe && node scripts/prepare-agent.js",
+    "package:agent:win": "powershell -NoProfile -Command \"Compress-Archive -Path 'dist/1bot-arduino-agent.exe','dist/serialport' -DestinationPath 'dist/1bot-arduino-agent-windows.zip' -Force\"",
+    "build:installer:win": "iscc installer\\1bot-arduino-agent.iss",
     "build:mac": "pkg . --targets node18-macos-x64,node18-macos-arm64 --out-path dist",
     "build:linux": "pkg . --targets node18-linux-x64,node18-linux-arm64 --out-path dist",
     "build:all": "pkg . --targets node18-win-x64,node18-linux-x64,node18-linux-arm64,node18-macos-x64,node18-macos-arm64 --out-path dist",
@@ -37,6 +39,10 @@
   "pkg": {
     "scripts": [
       "index.js"
+    ],
+    "assets": [
+      "node_modules/@serialport/bindings-cpp/prebuilds/**/*",
+      "node_modules/@serialport/bindings-cpp/package.json"
     ]
   }
 }

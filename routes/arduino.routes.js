@@ -2,6 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const {
   compileAndUpload,
+  compileArtifact,
   listPorts,
 } = require("../controllers/arduino.controller");
 const { createRequestRateLimit } = require("../services/request-rate-limit");
@@ -36,6 +37,14 @@ class ArduinoRoutes {
       this.compileRateLimit,
       this.upload.single("file"),
       compileAndUpload
+    );
+
+    this.router.post(
+      "/compile/artifact",
+      verifyToken,
+      this.compileRateLimit,
+      this.upload.single("file"),
+      compileArtifact
     );
 
     this.router.get(

@@ -31,6 +31,7 @@ COPY . .
 
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV LOCAL_AGENT_MODE=false
 ENV ARDUINO_CLI_VERSION=1.5.1
 ENV ARDUINO_CLI_PATH=/usr/local/bin/arduino-cli
 ENV CODEY_PYTHON_PATH=/usr/bin/python3

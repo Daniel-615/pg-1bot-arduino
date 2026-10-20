@@ -8,6 +8,7 @@ const https = require('https');
 
 const execFileAsync = promisify(execFile);
 const MAX_BUFFER_SIZE = 10 * 1024 * 1024;
+const CLI_COMMAND_TIMEOUT_MS = 180000;
 const ARTIFACT_PRIORITY = ['.hex', '.bin', '.uf2', '.elf'];
 const DEFAULT_RELEASE_VERSION = 'latest';
 const GITHUB_RELEASES_API = 'https://api.github.com/repos/arduino/arduino-cli/releases';
@@ -286,6 +287,7 @@ const extractArchive = async ({ archivePath, destinationDir, archiveType }) => {
     await execFileAsync('tar', ['-xzf', archivePath, '-C', destinationDir], {
       windowsHide: true,
       maxBuffer: MAX_BUFFER_SIZE,
+      timeout: CLI_COMMAND_TIMEOUT_MS,
     });
     return;
   }
@@ -473,6 +475,7 @@ const listInstalledCores = async (cliPath) => {
     {
       windowsHide: true,
       maxBuffer: MAX_BUFFER_SIZE,
+      timeout: CLI_COMMAND_TIMEOUT_MS,
     }
   );
 
@@ -514,11 +517,13 @@ const ensureCoreInstalledForFqbn = async (cliPath, fqbn) => {
   await execFileAsync(cliPath, ['core', 'update-index'], {
     windowsHide: true,
     maxBuffer: MAX_BUFFER_SIZE,
+    timeout: CLI_COMMAND_TIMEOUT_MS,
   });
 
   await execFileAsync(cliPath, ['core', 'install', coreId], {
     windowsHide: true,
     maxBuffer: MAX_BUFFER_SIZE,
+    timeout: CLI_COMMAND_TIMEOUT_MS,
   });
 
   return {
@@ -561,6 +566,7 @@ const compileSketch = async ({ fileName, fileBuffer, fqbn }) => {
       {
         windowsHide: true,
         maxBuffer: MAX_BUFFER_SIZE,
+        timeout: CLI_COMMAND_TIMEOUT_MS,
       }
     );
 

@@ -18,6 +18,25 @@ const uploadMutex = new KeyedMutex();
 
 const DEFAULT_FQBN = 'arduino:avr:uno';
 
+function getUserFacingArduinoError(error) {
+  const message = error?.message || '';
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes('spawn udevadm') || normalized.includes('udevadm')) {
+    return 'No se pudieron consultar los puertos del sistema. Conecta la placa e inténtalo de nuevo.';
+  }
+
+  if (normalized.includes('no arduino port detected')) {
+    return 'No se encontró el puerto de la placa. Conecta la placa y selecciona un puerto disponible.';
+  }
+
+  if (normalized.includes('no device found') || normalized.includes('cannot open port') || normalized.includes('access is denied')) {
+    return 'No se pudo abrir el puerto de la placa. Comprueba la conexión USB y que no esté siendo usado por otra aplicación.';
+  }
+
+  return message || 'No se pudo completar la operación con Arduino.';
+}
+
 function detectArduinoPort(ports) {
 
   return ports.find(p => {
@@ -211,7 +230,7 @@ const compileAndUpload = async (req, res) => {
     return res.status(500).json({
 
       ok: false,
-      error: error.message
+      error: getUserFacingArduinoError(error)
 
     });
 
@@ -223,7 +242,36 @@ const compileAndUploadQueued = async (req, res) => {
   try {
     return await compileLimiter.run(() => compileAndUpload(req, res));
   } catch (error) {
-    return res.status(error.statusCode || 503).json({ ok: false, error: error.message });
+    return res.status(error.statusCode || 503).json({ ok: false, error: getUserFacingArduinoError(error) });
+  }
+};
+
+// Browser flashing needs the compiled bytes, not a server-side serial upload.
+const compileArtifact = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ ok: false, error: 'No file uploaded' });
+    }
+
+    console.log('[Arduino] Iniciando compilación del artefacto:', req.file.originalname, req.body.fqbn);
+    const result = await require('../services/arduino.cli.service').compileSketch({
+      fileName: req.file.originalname,
+      fileBuffer: req.file.buffer,
+      fqbn: req.body.fqbn,
+    });
+    console.log('[Arduino] Artefacto compilado:', result.fileName);
+
+    res.set({
+      'Content-Type': result.contentType,
+      'Content-Disposition': `attachment; filename="${result.fileName}"`,
+      'X-Firmware-Format': path.extname(result.fileName).slice(1).toLowerCase(),
+      'X-Firmware-FQBN': result.fqbn,
+      'X-Firmware-Compile-Log': Buffer.from(result.compileLog || '').toString('base64'),
+    });
+    return res.send(result.fileBuffer);
+  } catch (error) {
+    console.error('[Arduino] Error al compilar artefacto:', error);
+    return res.status(500).json({ ok: false, error: getUserFacingArduinoError(error) });
   }
 };
 
@@ -242,7 +290,7 @@ const listPorts = async (req, res) => {
 
     return res.status(500).json({
       ok: false,
-      error: error.message
+      error: getUserFacingArduinoError(error)
     });
 
   }
@@ -251,5 +299,6 @@ const listPorts = async (req, res) => {
 
 module.exports = {
   compileAndUpload: compileAndUploadQueued,
+  compileArtifact,
   listPorts
 };

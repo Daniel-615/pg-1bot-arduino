@@ -3,6 +3,15 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const http = require("http");
+const path = require("path");
+
+if (process.pkg) {
+  process.env["@SERIALPORT/BINDINGS_CPP_PREBUILD"] = path.join(
+    path.dirname(process.execPath),
+    "serialport"
+  );
+}
+
 const { SerialPort } = require("serialport");
 const { ReadlineParser } = require("@serialport/parser-readline");
 const { Server } = require("socket.io");
